@@ -84,4 +84,11 @@ public interface SatoKenDao {
     }
 
     void deleteObject(String id);
+
+    /**
+     * 更新value
+     * @param key
+     * @param value
+     */
+    void update(String key, String value);
 }

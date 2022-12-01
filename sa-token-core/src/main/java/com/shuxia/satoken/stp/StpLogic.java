@@ -8,6 +8,7 @@ import com.shuxia.satoken.context.SaTokenContext;
 import com.shuxia.satoken.context.model.SaHolder;
 import com.shuxia.satoken.context.model.SaStorage;
 import com.shuxia.satoken.dao.SatoKenDao;
+import com.shuxia.satoken.exception.NotLoginException;
 import com.shuxia.satoken.exception.SaTokenException;
 import com.shuxia.satoken.listener.SaTokenEventCenter;
 import com.shuxia.satoken.session.SaSession;
@@ -17,8 +18,11 @@ import com.shuxia.satoken.util.SaFoxUtil;
 import com.shuxia.satoken.util.SaTokenConsts;
 import org.springframework.util.StringUtils;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Sa-Token 权限认证，逻辑实现类
@@ -321,6 +325,20 @@ public class StpLogic {
      */
     protected String distUsableToken(Object id, SaLoginModel loginModel) {
         //TODO 顶人下线
+        ///获取全局配置
+        Boolean isConcurrent = getConfig().getIsConcurrent();
+        if (!isConcurrent) {
+            //盯人下线
+            replaced(id,loginModel.getDevice());
+        }else{
+           //复用旧token
+            if (getConfigOfIsShare()){
+               String token = getTokenValueByLoginId(id,loginModel.getDevice());
+               if (StrUtil.isNotEmpty(token)){
+                   return token;
+               }
+            }
+        }
         //如果调用者自定义token
         if (SaFoxUtil.isNotEmpty(loginModel.getToken())){
              return loginModel.getToken();
@@ -329,6 +347,77 @@ public class StpLogic {
         //新建token
         return createTokenValue(id, loginModel.getDeviceOrDefault(), loginModel.getTimeout(), loginModel.getExtraData());
 
+    }
+
+    /**
+     * 根据loginId获取token
+     * @param id
+     * @param device
+     * @return
+     */
+    public String getTokenValueByLoginId(Object id, String device) {
+    List<String> tokenList=  getTokenValueListByLoginId(id,device);
+    return tokenList.size()==0?null:tokenList.get(tokenList.size()-1);
+    }
+
+    /**
+     * 获取指定id的token集合
+     * @param id
+     * @param device
+     * @return
+     */
+    public List<String> getTokenValueListByLoginId(Object id, String device) {
+        SaSession session = getSessionByLoginId(id,false);
+        if (session ==null){
+            return Collections.emptyList();
+        }
+        return session.tokenSignListCopy().stream()
+                .filter(tokenSign -> tokenSign.getDevice().equals(device))
+                .map(TokenSign::getValue)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 返回isShare属性
+     * @return
+     */
+    public boolean getConfigOfIsShare() {
+      return   getConfig().getIsShare();
+    }
+
+    /**
+     * 顶人下线
+     * @param id
+     * @param device
+     */
+    public void replaced(Object id, String device) {
+        SaSession session = getSessionByLoginId(id, false);
+        if (session!=null){
+            //通过设备名查找tokensign
+            session.tokenSignListCopyByDevice(device).stream()
+                    .peek(tokenSign -> {
+                        //清除 tokensign ，最后活跃时间
+                        String value = tokenSign.getValue();
+                        session.removeTokenSign(value);
+                        clearLastActivity(value);
+                        //标记token状态
+                        updateTokenToIdMapping(value, NotLoginException.BE_REPLACED);
+                        //打印
+                        SaTokenEventCenter.doReplaced(loginType,id,value);
+                    }).close();
+
+        }
+
+    }
+
+    /**
+     * 更新 token-id映射
+     * @param value
+     * @param loginId
+     */
+    public void updateTokenToIdMapping(String value, Object loginId) {
+        SaTokenException.throwBy(SaFoxUtil.isEmpty(loginId),"loginId不能为空");
+        getSaTokenDao().update(splicingKeyToken(value),loginId.toString());
     }
 
     /**

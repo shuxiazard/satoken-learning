@@ -77,6 +77,14 @@ public class SaTokenDaoDefaultImpl implements SatoKenDao{
        remove(id);
     }
 
+    @Override
+    public void update(String key, String value) {
+        if (getKeyTimeout(key)==SatoKenDao.NOT_VALUE_EXPIRE){
+            return;
+        }
+        dataMap.put(key,value);
+    }
+
     /**
      * 获取指定key的剩余存活时间 (单位：秒)
      */

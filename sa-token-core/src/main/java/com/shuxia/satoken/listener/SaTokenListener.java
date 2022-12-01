@@ -12,4 +12,6 @@ public interface SaTokenListener {
     void doLogout(String loginType, Object id, String token);
 
     void doLogoutSession(String id);
+
+    void doReplaced(String loginType, Object id, String value);
 }

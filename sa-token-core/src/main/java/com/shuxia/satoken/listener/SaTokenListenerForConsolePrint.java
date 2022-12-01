@@ -35,6 +35,14 @@ public class SaTokenListenerForConsolePrint implements SaTokenListener {
     }
 
     /**
+     * 每次被顶下线时触发
+     */
+    @Override
+    public void doReplaced(String loginType, Object id, String value) {
+        println("账号[" + id + "]被顶下线 (Token=" + value + ")");
+    }
+
+    /**
      * 日志输出的前缀
      */
     public static final String LOG_PREFIX = "SaLog -->: ";

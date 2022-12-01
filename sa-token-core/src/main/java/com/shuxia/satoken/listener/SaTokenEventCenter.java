@@ -42,4 +42,10 @@ public class SaTokenEventCenter  {
             listener.doLogoutSession(id);
         }
     }
+
+    public static void doReplaced(String loginType, Object id, String value) {
+        for (SaTokenListener listener : listenerList) {
+            listener.doReplaced(loginType,id,value);
+        }
+    }
 }
