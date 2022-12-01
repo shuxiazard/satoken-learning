@@ -22,6 +22,8 @@ public class StpUtilTest {
 
     @Test
     public void test(){
-        StpUtil.login(100);
+
+      //  StpUtil.login(100);
+        StpUtil.checkLogin();
     }
 }

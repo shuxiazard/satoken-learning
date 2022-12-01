@@ -1,5 +1,6 @@
 package com.shuxia.satoken.context;
 
+import com.shuxia.satoken.context.model.SaRequest;
 import com.shuxia.satoken.context.model.SaStorage;
 import com.shuxia.satoken.exception.SaTokenException;
 
@@ -21,6 +22,11 @@ public class SaTokenContextDefaultImpl implements SaTokenContext{
 
     @Override
     public SaStorage getStorage() {
+        throw new SaTokenException(ERROR_MESSAGE);
+    }
+
+    @Override
+    public SaRequest getRequest() {
         throw new SaTokenException(ERROR_MESSAGE);
     }
 

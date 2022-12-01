@@ -91,4 +91,6 @@ public interface SatoKenDao {
      * @param value
      */
     void update(String key, String value);
+
+    String get(String splicingKeyToken);
 }

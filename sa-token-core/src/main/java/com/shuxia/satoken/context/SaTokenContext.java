@@ -1,5 +1,6 @@
 package com.shuxia.satoken.context;
 
+import com.shuxia.satoken.context.model.SaRequest;
 import com.shuxia.satoken.context.model.SaStorage;
 
 /**
@@ -18,4 +19,6 @@ public interface SaTokenContext {
    default boolean isValid(){
        return false;
    }
+
+    SaRequest getRequest();
 }

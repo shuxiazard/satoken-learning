@@ -1,7 +1,9 @@
 package com.shuxia.satoken.spring;
 
 import com.shuxia.satoken.context.SaTokenContext;
+import com.shuxia.satoken.context.model.SaRequest;
 import com.shuxia.satoken.context.model.SaStorage;
+import com.shuxia.satoken.servlet.model.SaRequestForServlet;
 import com.shuxia.satoken.servlet.model.SaStorageForServlet;
 
 import javax.swing.*;
@@ -20,5 +22,10 @@ public class SaTokenContextForSpring implements SaTokenContext {
     @Override
     public boolean isValid() {
         return SpringMVCUtil.isWeb();
+    }
+
+    @Override
+    public SaRequest getRequest() {
+        return new SaRequestForServlet(SpringMVCUtil.getRequest());
     }
 }

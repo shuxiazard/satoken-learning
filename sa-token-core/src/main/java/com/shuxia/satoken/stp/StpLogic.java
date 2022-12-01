@@ -6,6 +6,7 @@ import com.shuxia.satoken.SaManager;
 import com.shuxia.satoken.config.SaTokenConfig;
 import com.shuxia.satoken.context.SaTokenContext;
 import com.shuxia.satoken.context.model.SaHolder;
+import com.shuxia.satoken.context.model.SaRequest;
 import com.shuxia.satoken.context.model.SaStorage;
 import com.shuxia.satoken.dao.SatoKenDao;
 import com.shuxia.satoken.exception.NotLoginException;
@@ -439,5 +440,175 @@ public class StpLogic {
      */
     public SaTokenConfig getConfig() {
         return SaManager.getConfig();
+    }
+
+    /**
+     * 检查登录
+     */
+    public void checkLogin() {
+        getLoginId();
+    }
+
+    /**
+     * 获取当前会话id
+     * @return
+     */
+    public Object getLoginId() {
+
+        //获取token
+        String token =getTokenValue();
+        if (token ==null){
+            throw NotLoginException.newInstance(loginType,NotLoginException.NOT_TOKEN);
+        }
+
+        //查找对应loginId
+        String loginId=getLoginIdNoHandle(token);
+        if (loginId==null){
+            throw NotLoginException.newInstance(loginType,NotLoginException.INVALID_TOKEN);
+        }
+        // 如果是已经过期，则抛出：已经过期
+        if(loginId.equals(NotLoginException.TOKEN_TIMEOUT)) {
+            throw NotLoginException.newInstance(loginType, NotLoginException.TOKEN_TIMEOUT, token);
+        }
+        // 如果是已经被顶替下去了, 则抛出：已被顶下线
+        if(loginId.equals(NotLoginException.BE_REPLACED)) {
+            throw NotLoginException.newInstance(loginType, NotLoginException.BE_REPLACED, token);
+        }
+        // 如果是已经被踢下线了, 则抛出：已被踢下线
+        if(loginId.equals(NotLoginException.KICK_OUT)) {
+            throw NotLoginException.newInstance(loginType, NotLoginException.KICK_OUT, token);
+        }
+
+        //检查是否临期
+        checkActivityTimeout(token);
+
+        //是否自动续期
+        if (getConfig().getAutoRenew()){
+            updateLastActivityToNow(token);
+        }
+        return loginId;
+    }
+
+    /**
+     * 更好token过期时间
+     * @param token
+     */
+    public void updateLastActivityToNow(String token) {
+        // 如果token == null 或者 设置了[永不过期], 则立即返回
+        if(token == null || !isOpenActivityCheck()) {
+            return;
+        }
+        getSaTokenDao().update(splicingKeyLastActivityTime(token),String.valueOf(System.currentTimeMillis()));
+    }
+
+    /**
+     * /检查是否临期
+     * @param token
+     */
+    public void checkActivityTimeout(String token) {
+       if (token ==null || !isOpenActivityCheck()){return;}
+
+       //获取剩余时间
+       long timeout= getTokenActivityTimeoutByToken(token);
+
+        // -1 代表此token已经被设置永不过期，无须继续验证
+        if(timeout == SatoKenDao.NEVER_EXPIRE) {
+            return;
+        }
+        // -2 代表已过期，抛出异常
+        if(timeout == SatoKenDao.NOT_VALUE_EXPIRE) {
+            throw NotLoginException.newInstance(loginType, NotLoginException.TOKEN_TIMEOUT, token);
+        }
+    }
+
+    /**
+     * 获取剩余时间
+     * @param token
+     * @return
+     */
+    public long getTokenActivityTimeoutByToken(String token) {
+        // 如果token为null , 则返回 -2
+        if(token == null) {
+            return SatoKenDao.NOT_VALUE_EXPIRE;
+        }
+        // 如果设置了永不过期, 则返回 -1
+        if(!isOpenActivityCheck()) {
+            return SatoKenDao.NEVER_EXPIRE;
+        }
+        //token最后活跃时间
+        String keyLastActivityTime = splicingKeyLastActivityTime(token);
+        String lastActivityTimeValue = getSaTokenDao().get(keyLastActivityTime);
+        if(lastActivityTimeValue ==null){
+            return SatoKenDao.NOT_VALUE_EXPIRE;
+        }
+
+        long lastActivityTime = Long.parseLong(lastActivityTimeValue);
+        long apartSecond =(System.currentTimeMillis() -lastActivityTime) /1000;
+        long timeout = getConfig().getActivityTimeout() -apartSecond;
+        if (timeout<0){
+            return SatoKenDao.NOT_VALUE_EXPIRE;
+        }
+        return timeout;
+
+    }
+
+    /**
+     * 通过token查找loginId
+     * @param token
+     * @return
+     */
+    public String getLoginIdNoHandle(String token) {
+       return getSaTokenDao().get(splicingKeyToken(token));
+    }
+
+    /**
+     * 获取token
+     * @return
+     */
+    public String getTokenValue() {
+        //获取token
+        String token = getTokenValueNotCut();
+
+
+        //如果有前缀
+        String tokenPrefix = getConfig().getTokenPrefix();
+        if (StrUtil.isNotEmpty(tokenPrefix)){
+            if (StrUtil.isEmpty(token) || !token.startsWith(tokenPrefix+ SaTokenConsts.TOKEN_CONNECTOR_CHAT)){
+                token =null;
+            }else{
+                token=  token.substring(tokenPrefix.length()+SaTokenConsts.TOKEN_CONNECTOR_CHAT.length());
+        }
+    }
+        return token;
+    }
+
+    /**
+     * 获取token 有自定义前缀
+     * @return
+     */
+    public String getTokenValueNotCut(){
+        String token =null;
+        SaStorage storage = SaHolder.getStorage();
+        SaRequest request = SaHolder.getRequest();
+        SaTokenConfig config = getConfig();
+        String tokenName = config.getTokenName();
+
+        //从存储器拿取
+        if(storage.get(splicingKeyJustCreateSave())!=null){
+            token=String.valueOf(storage.get(splicingKeyJustCreateSave()));
+        }
+        //从请求体拿取
+        if (token==null && config.getIsReadBody()){
+            token=request.getParam(tokenName);
+        }
+        //从请求头拿
+        if(token ==null && config.getIsReadHeader()){
+            token=request.getHeader(tokenName);
+        }
+        //cookie
+        if (token==null && config.getIsReadCookie()){
+            token=request.getCookieValue(tokenName);
+        }
+        return token;
     }
 }

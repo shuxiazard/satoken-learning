@@ -33,4 +33,11 @@ public class StpUtil {
         stpLogic.login(id);
     }
 
+    /**
+     * 检查是否登录
+     */
+    public static void checkLogin(){
+       stpLogic.checkLogin();
+    }
+
 }

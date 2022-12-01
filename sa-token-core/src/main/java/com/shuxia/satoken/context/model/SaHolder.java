@@ -18,4 +18,12 @@ public class SaHolder {
     public static SaStorage getStorage(){
         return SaManager.getSaTokenContextOrSecond().getStorage();
     }
+
+    /**
+     * 获取request
+     * @return
+     */
+    public static SaRequest getRequest(){
+        return SaManager.getSaTokenContextOrSecond().getRequest();
+    }
 }

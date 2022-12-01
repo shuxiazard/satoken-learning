@@ -85,6 +85,12 @@ public class SaTokenDaoDefaultImpl implements SatoKenDao{
         dataMap.put(key,value);
     }
 
+    @Override
+    public String get(String key) {
+        clearKeyByTimeout(key);
+        return (String)dataMap.get(key);
+    }
+
     /**
      * 获取指定key的剩余存活时间 (单位：秒)
      */
