@@ -86,6 +86,11 @@ public class SaTokenDaoDefaultImpl implements SatoKenDao{
     }
 
     @Override
+    public long getTimeout(String key) {
+        return getKeyTimeout(key);
+    }
+
+    @Override
     public String get(String key) {
         clearKeyByTimeout(key);
         return (String)dataMap.get(key);

@@ -92,5 +92,7 @@ public interface SatoKenDao {
      */
     void update(String key, String value);
 
-    String get(String splicingKeyToken);
+    String get(String key);
+
+    long getTimeout(String key);
 }

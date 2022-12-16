@@ -3,6 +3,12 @@ package com.shuxia.satoken.listener;
 import com.shuxia.satoken.SaManager;
 import com.shuxia.satoken.dao.SatoKenDao;
 import com.shuxia.satoken.stp.SaLoginModel;
+import com.shuxia.satoken.util.SaFoxUtil;
+
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * 控制台log打印
@@ -65,5 +71,19 @@ public class SaTokenListenerForConsolePrint implements SaTokenListener {
     @Override
     public void doKickOut(String loginType, String loginId, String tokenValue) {
         println("账号[" + loginId + "]被踢下线 (Token=" + tokenValue + ")");
+    }
+
+    @Override
+    public void doDisable(String loginType, Object loginId, String service, int level, long time) {
+       //获取当前时间戳 utc通用时间
+        Instant instant = Instant.ofEpochMilli(System.currentTimeMillis() + time * 1000);
+        //特定时区
+        ZonedDateTime zonedDateTime = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
+        println("账号[" + loginId + "] " + service + " 服务被封禁，封禁等级=" + level + " (解封时间: " + zonedDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + ")");
+    }
+
+    @Override
+    public void doUntieDisable(String loginType, Object loginId, String service) {
+        println("账号[" + loginId + "] " + service + " 服务被解除封禁");
     }
 }

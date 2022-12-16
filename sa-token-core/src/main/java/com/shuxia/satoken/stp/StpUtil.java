@@ -55,4 +55,46 @@ public class StpUtil {
         stpLogic.kickoutByTokenValue(token);
     }
 
+    /**
+     * 封禁账号
+     * @param loginId
+     * @param time 单位秒
+     */
+    public static void disable(Object loginId,long time){
+        stpLogic.disable(loginId,time);
+    }
+
+    /**
+     * 封禁账号
+     * @param loginId
+     * @param service
+     * @param time 单位秒
+     */
+    public static void disable(Object loginId,String service,long time){
+        stpLogic.disable(loginId,service,time);
+    }
+
+    /**
+     * 账号是否封禁
+     * @param loginId
+     */
+    public static boolean isDisable(Object loginId){
+        return stpLogic.isDisable(loginId);
+    }
+    public static boolean isDisable(Object loginId,String service){
+      return stpLogic.isDisable(loginId,service);
+    }
+
+    /**
+     * 获取封禁时间
+     * @param loginId
+     * @return
+     */
+    public static long getDisableTime(Object loginId){
+      return  stpLogic.getDisableTime(loginId);
+    }
+
+    public static void uniteDisable(Object loginId){
+        stpLogic.uniteDisable(loginId);
+    }
 }

@@ -16,4 +16,8 @@ public interface SaTokenListener {
     void doReplaced(String loginType, Object id, String value);
 
     void doKickOut(String loginType, String loginId, String tokenValue);
+
+    void doDisable(String loginType, Object loginId, String service, int level, long time);
+
+    void doUntieDisable(String loginType, Object loginId, String service);
 }

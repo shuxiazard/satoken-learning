@@ -70,7 +70,7 @@ public class SaTokenConfig implements Serializable {
     private Boolean isPrint = true;
 
     /** 是否打印操作日志 */
-    private Boolean isLog = false;
+    private Boolean isLog = true;
 
     /**
      * jwt秘钥 (只有集成 jwt 模块时此参数才会生效)

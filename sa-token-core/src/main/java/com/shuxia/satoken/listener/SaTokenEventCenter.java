@@ -54,4 +54,16 @@ public class SaTokenEventCenter  {
             listener.doKickOut(loginType,loginId,tokenValue);
         }
     }
+
+    public static void doDisable(String loginType, Object loginId,String service, int level, long time) {
+        for (SaTokenListener listener : listenerList) {
+            listener.doDisable(loginType, loginId, service, level, time);
+        }
+    }
+
+    public static void doUntieDisable(String loginType, Object loginId, String service) {
+        for (SaTokenListener listener : listenerList) {
+            listener.doUntieDisable(loginType, loginId, service);
+        }
+    }
 }
