@@ -29,7 +29,7 @@ public interface SatoKenDao {
      */
     Object getObject(String key);
 
-   default void getSession(SaSession session, long timeout){
+   default void setSession(SaSession session, long timeout){
       setObject(session.getId(),session,timeout);
    }
 

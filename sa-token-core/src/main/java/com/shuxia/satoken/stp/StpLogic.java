@@ -83,7 +83,7 @@ public class StpLogic {
                 String value = tokenSign.getValue();
                 session.removeTokenSign(value);
                 clearLastActivity(value);
-                updateTokenToIdMapping(value,NotLoginException.KICK_OUT_MESSAGE);
+                updateTokenToIdMapping(value,NotLoginException.KICK_OUT);
             }
             //注销session
             session.logoutByTokenSignCountToZero();
@@ -204,6 +204,7 @@ public class StpLogic {
         //获取user-session
         SaSession session =getSessionByLoginId(id,true);
         session.updateMinTimeout(loginModel.getTimeout());
+        SatoKenDao saTokenDao = getSaTokenDao();
 
         //记录token签名
         session.addTokenSign(token,loginModel.getDeviceOrDefault());
@@ -355,7 +356,7 @@ public class StpLogic {
         //创建条件： 为空 && isCreate ==true
         if (session ==null && isCreate){
            session  = SaStrategy.me.createSession.apply(loginId);
-           getSaTokenDao().getSession(session,getConfig().getTimeout());
+           getSaTokenDao().setSession(session,getConfig().getTimeout());
         }
         return session;
     }

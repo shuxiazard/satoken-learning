@@ -25,7 +25,7 @@ public class SaStrategy {
      */
     public static final SaStrategy me = new SaStrategy();
 
-    public Function<String, SaSession> createSession =(sessionId) -> new SaSession(sessionId);
+    public Function<String, SaSession> createSession = SaSession::new;
 
 
     /**

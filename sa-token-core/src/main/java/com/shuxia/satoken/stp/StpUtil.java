@@ -40,4 +40,19 @@ public class StpUtil {
        stpLogic.checkLogin();
     }
 
+    /**
+     * 踢人下线
+     */
+    public static void kickout(Object loginId){
+        stpLogic.kickout(loginId);
+    }
+
+    /**
+     * 踢人下线 根据token
+     * @param token
+     */
+    public static void kickoutByToken(String token){
+        stpLogic.kickoutByTokenValue(token);
+    }
+
 }
