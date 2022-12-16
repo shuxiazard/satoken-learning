@@ -107,7 +107,7 @@ public class SaTokenDaoDefaultImpl implements SatoKenDao{
              return SatoKenDao.NEVER_EXPIRE;
          }
          //剩余时间
-         long timeout = expirationTimeout - System.currentTimeMillis() * 1000;
+         long timeout = expirationTimeout - System.currentTimeMillis() / 1000;
          //清除
          if (timeout <0){
              remove(key);
