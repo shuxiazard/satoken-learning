@@ -2,6 +2,11 @@ package com.shuxia.satoken.exception;
 
 import com.shuxia.satoken.util.SaFoxUtil;
 import lombok.Getter;
+import sun.awt.HKSCS;
+
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author shuxia
@@ -31,6 +36,9 @@ public class NotLoginException extends RuntimeException{
 
     /** 默认的提示语 */
     public static final String DEFAULT_MESSAGE = "当前会话未登录";
+
+    /** 无效登录id*/
+    public static final List<String> ABNORMAL_LIST = Arrays.asList(NOT_TOKEN,INVALID_TOKEN, TOKEN_TIMEOUT, BE_REPLACED, KICK_OUT);
 
 
     /**

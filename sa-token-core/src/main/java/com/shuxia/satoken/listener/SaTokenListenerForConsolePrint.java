@@ -55,4 +55,15 @@ public class SaTokenListenerForConsolePrint implements SaTokenListener {
             System.out.println(LOG_PREFIX + str);
         }
     }
+
+    /**
+     *  踢人下线
+     * @param loginType
+     * @param loginId
+     * @param tokenValue
+     */
+    @Override
+    public void doKickOut(String loginType, String loginId, String tokenValue) {
+        println("账号[" + loginId + "]被踢下线 (Token=" + tokenValue + ")");
+    }
 }

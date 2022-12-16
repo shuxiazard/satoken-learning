@@ -48,4 +48,10 @@ public class SaTokenEventCenter  {
             listener.doReplaced(loginType,id,value);
         }
     }
+
+    public static void doKickOut(String loginType, String loginId, String tokenValue) {
+        for (SaTokenListener listener : listenerList) {
+            listener.doKickOut(loginType,loginId,tokenValue);
+        }
+    }
 }

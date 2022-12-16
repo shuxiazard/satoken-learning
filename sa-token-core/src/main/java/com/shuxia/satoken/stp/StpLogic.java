@@ -63,6 +63,66 @@ public class StpLogic {
     }
 
     /**
+     * 踢人下线  根据登录id
+     * @param loginId
+     */
+    public void kickout(Object loginId ){
+        kickout(loginId,null);
+    }
+
+    /**
+     * 踢人下线，根据登录id和设备
+     * @param loginId
+     * @param device
+     */
+    public void kickout(Object loginId,String device){
+        //获取登录id的session
+        SaSession session = getSessionByLoginId(loginId, false);
+        if (session!=null){
+            for (TokenSign tokenSign : session.tokenSignListCopyByDevice(device)) {
+                String value = tokenSign.getValue();
+                session.removeTokenSign(value);
+                clearLastActivity(value);
+                updateTokenToIdMapping(value,NotLoginException.KICK_OUT_MESSAGE);
+            }
+            //注销session
+            session.logoutByTokenSignCountToZero();
+        }
+    }
+
+    /**
+     * 踢人下线  根据token
+     * @param tokenValue
+     */
+    public void kickoutByTokenValue(String tokenValue){
+        clearLastActivity(tokenValue);
+        //获取登录id
+        String loginId = getLoginIdNoHandle(tokenValue);
+        if (!isValidLoginId(loginId)){
+            return;
+        }
+        //标记token状态
+        updateTokenToIdMapping(tokenValue,NotLoginException.KICK_OUT_MESSAGE);
+        SaTokenEventCenter.doKickOut(loginType,loginId,tokenValue);
+        //session移除token
+        SaSession session = getSessionByLoginId(loginId, false);
+        if (session !=null){
+            session.removeTokenSign(tokenValue);
+            session.logoutByTokenSignCountToZero();
+        }
+    }
+
+    /**
+     * 验证id有效性
+     * @param loginId
+     * @return
+     */
+    public boolean isValidLoginId(String loginId) {
+        return loginId != null && !NotLoginException.ABNORMAL_LIST.contains(loginId.toString());
+    }
+
+
+    /**
      * 会话登录
      * @param id 账号id
      */
@@ -325,11 +385,10 @@ public class StpLogic {
      * @return
      */
     protected String distUsableToken(Object id, SaLoginModel loginModel) {
-        //TODO 顶人下线
         ///获取全局配置
         Boolean isConcurrent = getConfig().getIsConcurrent();
         if (!isConcurrent) {
-            //盯人下线
+            //顶人下线
             replaced(id,loginModel.getDevice());
         }else{
            //复用旧token
