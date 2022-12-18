@@ -6,6 +6,8 @@ import com.shuxia.satoken.context.SaTokenContextDefaultImpl;
 import com.shuxia.satoken.context.model.SaStorage;
 import com.shuxia.satoken.dao.SaTokenDaoDefaultImpl;
 import com.shuxia.satoken.dao.SatoKenDao;
+import com.shuxia.satoken.stp.StpInterface;
+import com.shuxia.satoken.stp.StpInterfaceDefaultImpl;
 import com.shuxia.satoken.stp.StpUtil;
 import com.sun.xml.internal.fastinfoset.stax.StAXManager;
 
@@ -75,5 +77,24 @@ public class SaManager {
     }
 
     public static void setSaTokenSecondContext(SaTokenContext saTokenContext) {
+    }
+
+    /**
+     * 权限认证bean
+     * @param stpInterface
+     */
+    public volatile static StpInterface stpInterface;
+    public static void setStpInterface(StpInterface stpInterface) {
+     SaManager.stpInterface=stpInterface;
+    }
+    public static StpInterface getStpInterface(){
+        if (stpInterface ==null){
+            synchronized (SaManager.class){
+                if (stpInterface ==null){
+                    setStpInterface(new StpInterfaceDefaultImpl());
+                }
+            }
+        }
+        return stpInterface;
     }
 }

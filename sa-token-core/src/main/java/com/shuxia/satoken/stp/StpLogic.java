@@ -12,6 +12,7 @@ import com.shuxia.satoken.context.model.SaStorage;
 import com.shuxia.satoken.dao.SatoKenDao;
 import com.shuxia.satoken.exception.DisableServiceException;
 import com.shuxia.satoken.exception.NotLoginException;
+import com.shuxia.satoken.exception.NotPermissionException;
 import com.shuxia.satoken.exception.SaTokenException;
 import com.shuxia.satoken.listener.SaTokenEventCenter;
 import com.shuxia.satoken.session.SaSession;
@@ -66,6 +67,130 @@ public class StpLogic {
         return this;
     }
 
+    // region -------------------- 权限认证 ----------------------
+
+    /**
+     * 获取当前账号权限
+     * @return
+     */
+    public List<String> getPermissionList(){
+        try {
+            return getPermissionList(getLoginId());
+        } catch (NotLoginException e) {
+           return Collections.emptyList();
+        }
+    }
+
+    /**
+     * 获取权限 根据id
+     * @param loginId
+     * @return
+     */
+    public List<String> getPermissionList(Object loginId){
+        return SaManager.getStpInterface().getPermissionList(loginId,loginType);
+    }
+
+    /**
+     * 是否有指定权限
+     * @param permission
+     * @return
+     */
+    public boolean hasPermission(String permission){
+        return hasElement(getPermissionList(),permission);
+    }
+
+    /**
+     * 根据id和指定权限判断是否有权限
+     * @param loginId
+     * @param permission
+     * @return
+     */
+    public boolean hasPermission(Object loginId ,String permission){
+        return hasElement(getPermissionList(loginId),permission);
+    }
+
+    /**
+     * 是否有多个指定权限
+     * @param permissionArray
+     * @return
+     */
+    public boolean hasPermissionAnd(String...permissionArray){
+        try {
+            checkPermissionAnd(permissionArray);
+            return true;
+        } catch (NotLoginException | NotPermissionException e) {
+            return false;
+        }
+    }
+
+    /**
+     * 是否有任意一个指定权限
+     * @param permissionArray
+     * @return
+     */
+    public boolean hasPermissionOr(String...permissionArray){
+        try {
+            checkPermissionOr(permissionArray);
+            return true;
+        } catch (NotLoginException | NotPermissionException e) {
+            return false;
+        }
+    }
+
+    /**
+     * 是否有指定权限
+     * @param permission
+     */
+    public void checkPermission(String permission){
+        if (!hasPermission(permission)) {
+            throw new NotPermissionException(permission,this.loginType);
+        }
+    }
+
+    /**
+     * 是否有任意一个指定权限
+     * @param permissionArray
+     */
+    public void checkPermissionOr(String... permissionArray) {
+        Object loginId = getLoginId();
+        List<String> permissionList = getPermissionList(loginId);
+        for (String per : permissionArray) {
+            if (hasElement(permissionList,per)) {
+                return;
+            }
+        }
+        if (permissionArray.length>0){
+            throw new NotPermissionException(permissionArray[0],this.loginType);
+        }
+    }
+
+
+    /**
+     * 是否有多个指定权限
+     * @param permissionArray
+     */
+    public void checkPermissionAnd(String... permissionArray) {
+        //获取登录账号权限
+        Object loginId = getLoginId();
+        List<String> permissionList = getPermissionList(loginId);
+        for (String per : permissionArray) {
+            if (!hasElement(permissionList,per)){
+                throw new NotPermissionException(per,this.loginType);
+            }
+        }
+    }
+
+    /**
+     * 集合查找元素
+     * @param permissionList
+     * @param permission
+     * @return
+     */
+    public boolean hasElement(List<String> permissionList,String permission){
+       return SaStrategy.me.hasElement.apply(permissionList,permission);
+    }
+
+    // endregion
     // region -------------------- 会话注销 ----------------------
 
     public void logout(){
@@ -140,6 +265,7 @@ public class StpLogic {
             session.logoutByTokenSignCountToZero();
         }
     }
+    // endregion
 
     // region -------------------- 账号封禁 ----------------------
 

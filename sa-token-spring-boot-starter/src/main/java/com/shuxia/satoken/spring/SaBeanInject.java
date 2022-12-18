@@ -3,6 +3,7 @@ package com.shuxia.satoken.spring;
 import com.shuxia.satoken.SaManager;
 import com.shuxia.satoken.config.SaTokenConfig;
 import com.shuxia.satoken.context.SaTokenContext;
+import com.shuxia.satoken.stp.StpInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,4 +28,12 @@ public class SaBeanInject {
      */
     @Autowired(required = false)
     public void setContext(SaTokenContext saTokenContext){SaManager.setSaTokenContext(saTokenContext);}
+
+    /**
+     * 注入权限认证Bean
+     *
+     * @param stpInterface StpInterface对象
+     */
+    @Autowired(required = false)
+    public void setStpInterface(StpInterface stpInterface){SaManager.setStpInterface(stpInterface);}
 }

@@ -1,5 +1,7 @@
 package com.shuxia.satoken.stp;
 
+import java.util.List;
+
 /**
  * Sa-Token 权限认证工具类
  * @author shuxia
@@ -40,6 +42,7 @@ public class StpUtil {
        stpLogic.checkLogin();
     }
 
+    //region ----------------踢人下线---------------
     /**
      * 踢人下线
      */
@@ -55,6 +58,9 @@ public class StpUtil {
         stpLogic.kickoutByTokenValue(token);
     }
 
+    //endregion
+
+    //region ----------------封禁相关---------------
     /**
      * 封禁账号
      * @param loginId
@@ -82,7 +88,7 @@ public class StpUtil {
         return stpLogic.isDisable(loginId);
     }
     public static boolean isDisable(Object loginId,String service){
-      return stpLogic.isDisable(loginId,service);
+        return stpLogic.isDisable(loginId,service);
     }
 
     /**
@@ -91,10 +97,85 @@ public class StpUtil {
      * @return
      */
     public static long getDisableTime(Object loginId){
-      return  stpLogic.getDisableTime(loginId);
+        return  stpLogic.getDisableTime(loginId);
     }
 
     public static void uniteDisable(Object loginId){
         stpLogic.uniteDisable(loginId);
     }
+    //endregion
+
+    //region -----------------注销相关-------------
+    /**
+     * 注销
+     */
+    public static void logout(){
+        stpLogic.logout();
+    }
+
+    /**
+     * 根据id注销
+     * @param loginId
+     */
+    public static void logout(Object loginId){
+        stpLogic.logout(loginId);
+    }
+
+    /**
+     * 根据id和设备注销
+     * @param loginId
+     * @param device
+     */
+    public static void logout(Object loginId,String device){
+        stpLogic.logout(loginId,device);
+    }
+    //endregion
+
+    //region -------------------权限相关--------------
+
+    /**
+     * 获取当前账号权限
+     * @return
+     */
+    public static List<String> getPermissionList(){
+        return stpLogic.getPermissionList();
+    }
+
+    /**
+     * 获取账号权限 根据id
+     * @param loginId
+     * @return
+     */
+    public static List<String> getPermissionList(Object loginId){
+        return stpLogic.getPermissionList(loginId);
+    }
+
+    /**
+     * 判断是否有指定权限
+     * @param permission
+     * @return
+     */
+    public static boolean hasPermission(String permission){
+        return stpLogic.hasPermission(permission);
+    }
+
+    /**
+     * 判断是否有指定权限(多个)
+     * @param permissionArray
+     * @return
+     */
+    public static boolean hasPermissionAnd(String... permissionArray){
+        return stpLogic.hasPermissionAnd(permissionArray);
+    }
+
+    /**
+     * 判断是否有指定权限(任意一个)
+     * @param permissionArray
+     * @return
+     */
+    public static boolean hasPermissionOr(String... permissionArray){
+        return stpLogic.hasPermissionOr(permissionArray);
+    }
+    //endregion
+
 }

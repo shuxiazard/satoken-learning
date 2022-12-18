@@ -6,10 +6,13 @@ import com.shuxia.satoken.SaManager;
 import com.shuxia.satoken.session.SaSession;
 import com.shuxia.satoken.util.SaFoxUtil;
 import com.shuxia.satoken.util.SaTokenConsts;
+import org.springframework.util.CollectionUtils;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 /**
  * @author shuxia
@@ -27,6 +30,26 @@ public class SaStrategy {
 
     public Function<String, SaSession> createSession = SaSession::new;
 
+
+    /**
+     * 判断集合是否包含指定元素
+     */
+    public BiFunction<List<String>,String,Boolean> hasElement =(list,element)->{
+        if (CollectionUtils.isEmpty(list)){
+            return false;
+        }
+        if (list.contains(element)){
+            return true;
+        }
+        //模糊查询
+        for (String s : list) {
+            if (!s.contains("*")){
+                return s.equals(element);
+            }
+            return Pattern.matches(s.replaceAll("\\*",".*"),s);
+        }
+        return false;
+    };
 
     /**
      * 创建 Token 的策略
