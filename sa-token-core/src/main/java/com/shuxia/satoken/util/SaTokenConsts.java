@@ -47,6 +47,11 @@ public interface SaTokenConsts {
 
 
     /**
+     * 常量key标记: 如果本次请求已经验证过[无操作过期], 则以此值存储在当前request中
+     */
+    public static final String TOKEN_ACTIVITY_TIMEOUT_CHECKED_KEY = "TOKEN_ACTIVITY_TIMEOUT_CHECKED_KEY_";
+
+    /**
      * 常量key标记: 如果token为本次请求新创建的，则以此字符串为key存储在当前request中
      */
     public static final String JUST_CREATED = "JUST_CREATED_";

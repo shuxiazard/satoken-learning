@@ -3,6 +3,7 @@ package com.shuxia.satoken.stp;
 
 import cn.hutool.core.util.StrUtil;
 import com.shuxia.satoken.SaManager;
+import com.shuxia.satoken.config.SaCookieConfig;
 import com.shuxia.satoken.config.SaTokenConfig;
 import com.shuxia.satoken.context.SaTokenContext;
 import com.shuxia.satoken.context.model.SaHolder;
@@ -65,7 +66,82 @@ public class StpLogic {
         return this;
     }
 
-    //region-------------------- 账号封禁 ----------------------
+    // region -------------------- 会话注销 ----------------------
+
+    public void logout(){
+        // 如果连 Token 都没有，那么无需执行任何操作
+        String tokenValue = getTokenValue();
+        if(SaFoxUtil.isEmpty(tokenValue)) {
+            return;
+        }
+
+        // 从当前 [Storage存储器] 里删除 Token
+        SaHolder.getStorage().delete(splicingKeyJustCreateSave());
+
+        // 清除当前上下文的 [临时有效期check标记]
+        SaHolder.getStorage().delete(SaTokenConsts.TOKEN_ACTIVITY_TIMEOUT_CHECKED_KEY);
+
+        // 清除这个 Token 的相关信息
+        logoutByToken(tokenValue);
+    }
+
+
+    /**
+     * 会话注销 根据id
+     * @param loginId
+     */
+    public void logout(Object loginId){
+        logout(loginId,null);
+    }
+
+    /**
+     * 会话注销 根据id和设备
+     * @param loginId
+     * @param service
+     */
+    public void logout(Object loginId,String service){
+            //获取session
+        SaSession session = getSessionByLoginId(loginId, false);
+        if (session!=null){
+            for (TokenSign tokenSign : session.tokenSignListCopyByDevice(service)) {
+                String token = tokenSign.getValue();
+                clearLastActivity(token);
+                session.removeTokenSign(token);
+                deleteTokenToIdMapping(token);
+                deleteTokenToSession(token);
+                // $$ 发布事件：指定账号注销
+                SaTokenEventCenter.doLogout(loginType, loginId, token);
+            }
+            session.logoutByTokenSignCountToZero();
+        }
+    }
+
+    /**
+     * 会话注销 根据token
+     * @param tokenValue
+     */
+    public void logoutByToken(String tokenValue){
+        clearLastActivity(tokenValue);
+        deleteTokenToSession(tokenValue);
+
+        //获取登录id
+        String loginId = getLoginIdNoHandle(tokenValue);
+        //验证id有效性
+        if (!isValidLoginId(loginId)){
+            return;
+        }
+        //删除token-id映射
+        deleteTokenToIdMapping(tokenValue);
+
+        //删除session
+        SaSession session = getSessionByLoginId(loginId, false);
+        if (session!=null){
+            session.removeTokenSign(tokenValue);
+            session.logoutByTokenSignCountToZero();
+        }
+    }
+
+    // region -------------------- 账号封禁 ----------------------
 
     /**
      * 封禁账号 根据id
@@ -270,7 +346,7 @@ public class StpLogic {
     public String splicingKeyDisable(Object loginId, String service) {
         return getConfig().getTokenName() + ":" + loginType + ":disable:" + service + ":" + loginId;
     }
-
+    //endregion
 
     // region ------------------踢人下线 ------------------------
 
