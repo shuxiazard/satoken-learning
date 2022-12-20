@@ -46,7 +46,7 @@ public class SaStrategy {
             if (!s.contains("*")){
                 return s.equals(element);
             }
-            return Pattern.matches(s.replaceAll("\\*",".*"),s);
+            return Pattern.matches(s.replaceAll("\\*",".*"),element);
         }
         return false;
     };

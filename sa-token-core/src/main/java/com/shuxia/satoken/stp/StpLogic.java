@@ -10,10 +10,7 @@ import com.shuxia.satoken.context.model.SaHolder;
 import com.shuxia.satoken.context.model.SaRequest;
 import com.shuxia.satoken.context.model.SaStorage;
 import com.shuxia.satoken.dao.SatoKenDao;
-import com.shuxia.satoken.exception.DisableServiceException;
-import com.shuxia.satoken.exception.NotLoginException;
-import com.shuxia.satoken.exception.NotPermissionException;
-import com.shuxia.satoken.exception.SaTokenException;
+import com.shuxia.satoken.exception.*;
 import com.shuxia.satoken.listener.SaTokenEventCenter;
 import com.shuxia.satoken.session.SaSession;
 import com.shuxia.satoken.session.TokenSign;
@@ -66,7 +63,113 @@ public class StpLogic {
         this.loginType = loginType;
         return this;
     }
+    // region -------------------- 角色认证 ----------------------
 
+    /**
+     * 获取当前账号角色集合
+     * @return
+     */
+  public List<String > getRoleList(){
+        try{
+            return getRoleList(getLoginId());
+        }catch (NotLoginException e){
+            return Collections.emptyList();
+        }
+  }
+
+    /**
+     * 获取指定账号角色集合
+     * @param loginId
+     * @return
+     */
+  public List<String> getRoleList(Object loginId){
+        return SaManager.getStpInterface().getRoleList(loginId,loginType);
+  }
+
+    /**
+     * 当前账号是否有指定角色
+     * @param role
+     * @return
+     */
+  public boolean hasRole(String role){
+      return hasElement(getRoleList(),role);
+  }
+
+    /**
+     * 获取指定账号是否有指定角色
+     * @param loginId
+     * @param role
+     * @return
+     */
+  public boolean hasRole(Object loginId,String role){
+      return hasElement(getRoleList(loginId),role);
+  }
+
+    /**
+     * 是否拥有指定角色（多个）
+     * @param role
+     * @return
+     */
+  public boolean hasRoleAnd(String...role){
+      try{
+          checkRoleAnd(role);
+          return true;
+      }catch (NotLoginException | NotRoleException e){
+          return false;
+      }
+  }
+
+    /**
+     * 是否拥有指定角色（任意一个）
+     * @param roles
+     * @return
+     */
+  public boolean hasRoleOr(String...roles){
+      try{
+          checkRoleOr(roles);
+          return true;
+      }catch (NotLoginException | NotRoleException e){
+          return false;
+      }
+  }
+
+    /**
+     * 是否拥有指定角色
+     * @param role
+     */
+  public void checkRole(String role){
+      if (!hasRole(role)){
+          throw new NotRoleException(role,this.loginType);
+      }
+  }
+    /**
+     * 是否拥有指定角色（多个）
+     * @param role
+     */
+    public void checkRoleAnd(String... role) {
+        List<String> roleList = getRoleList();
+        for (String r : role) {
+            if (!hasElement(roleList,r)){
+                throw new NotRoleException(r,this.loginType);
+            }
+        }
+    }
+    /**
+     * 是否拥有指定角色（任意）
+     * @param role
+     */
+    public void checkRoleOr(String... role) {
+        List<String> roleList = getRoleList();
+        for (String r : role) {
+            if (hasElement(roleList,r)){
+                return;
+            }
+        }
+        if (role.length>0){
+            throw new NotRoleException(role[0],this.loginType);
+        }
+    }
+    //endregion
     // region -------------------- 权限认证 ----------------------
 
     /**

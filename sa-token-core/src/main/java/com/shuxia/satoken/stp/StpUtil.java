@@ -178,4 +178,60 @@ public class StpUtil {
     }
     //endregion
 
+    //region -----------------角色认证相关-------------
+
+    /**
+     * 获取当前账号角色集合
+     * @return
+     */
+    public List<String> getRoleList(){
+        return stpLogic.getRoleList();
+    }
+
+    /**
+     * 获取指定账号角色集合
+     * @param loginId
+     * @return
+     */
+    public List<String> getRoleList(Object loginId){
+        return stpLogic.getRoleList(loginId);
+    }
+
+    /**
+     * 判断当前账号是否有指定角色
+     * @param role
+     * @return
+     */
+    public boolean hasRole(String role){
+        return stpLogic.hasRole(role);
+    }
+
+    /**
+     * 判断账号是否有指定角色
+     * @param loginId
+     * @param role
+     * @return
+     */
+    public boolean hasRole(Object loginId,String role){
+        return stpLogic.hasRole(loginId,role);
+    }
+
+    /**
+     * 判断当前账号是否有指定角色（多个）
+     * @param role
+     * @return
+     */
+    public boolean hasRoleAnd(String...role){
+        return stpLogic.hasRoleAnd(role);
+    }
+
+    /**
+     * 判断当前账号是否有指定角色（任意）
+     * @param role
+     * @return
+     */
+    public boolean hasRoleOr(String...role){
+        return stpLogic.hasRoleOr(role);
+    }
+    //endregion
 }
