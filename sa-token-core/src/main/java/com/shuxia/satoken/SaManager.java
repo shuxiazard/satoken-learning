@@ -8,6 +8,7 @@ import com.shuxia.satoken.dao.SaTokenDaoDefaultImpl;
 import com.shuxia.satoken.dao.SatoKenDao;
 import com.shuxia.satoken.stp.StpInterface;
 import com.shuxia.satoken.stp.StpInterfaceDefaultImpl;
+import com.shuxia.satoken.stp.StpLogic;
 import com.shuxia.satoken.stp.StpUtil;
 import com.sun.xml.internal.fastinfoset.stax.StAXManager;
 
@@ -30,6 +31,9 @@ public class SaManager {
         StpUtil.getLoginType();
     }
 
+    public static StpLogic getStpLogic(){
+        return StpUtil.stpLogic;
+    }
 
     /**
      * 持久化 Bean

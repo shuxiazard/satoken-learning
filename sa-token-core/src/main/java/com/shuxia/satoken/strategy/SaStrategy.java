@@ -3,14 +3,20 @@ package com.shuxia.satoken.strategy;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import com.shuxia.satoken.SaManager;
+import com.shuxia.satoken.annotation.SaCheckLogin;
 import com.shuxia.satoken.session.SaSession;
+import com.shuxia.satoken.stp.StpLogic;
 import com.shuxia.satoken.util.SaFoxUtil;
 import com.shuxia.satoken.util.SaTokenConsts;
 import org.springframework.util.CollectionUtils;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
@@ -30,6 +36,40 @@ public class SaStrategy {
 
     public Function<String, SaSession> createSession = SaSession::new;
 
+
+    //region -------------------注解鉴权相关-----------------
+    /**
+     * 判断Method或其所属的Class是否包含指定注解
+     */
+    public BiFunction<Method,Class<? extends Annotation>,Boolean> isAnnotationPresent =((method, aClass) ->
+            me.getAnnotation.apply(method,aClass) !=null ||
+                    me.getAnnotation.apply(method.getDeclaringClass(),aClass)!=null);
+    /**
+     * 从元素（类，方法---所有实现AnnotatedElement类）上获取注解
+     */
+    public BiFunction<AnnotatedElement,Class< ? extends Annotation>,Annotation> getAnnotation=(AnnotatedElement::getAnnotation);
+    /**
+     * 对一个 [Method] 对象进行注解校验
+     */
+   public Consumer<Method> checkMethodAnnotation=(method -> {
+       //检验Class上的注解
+       me.checkElementAnnotation.accept(method.getDeclaringClass());
+       //Method上的注解
+       me.checkElementAnnotation.accept(method);
+   });
+    /**
+     * 对一个 [Method] 对象进行注解校验 （注解鉴权内部实现）
+     */
+   public Consumer<AnnotatedElement> checkElementAnnotation =(element->{
+       //检验@SaCheckLogin 注解
+       SaCheckLogin checkLogin = (SaCheckLogin) SaStrategy.me.getAnnotation.apply(element, SaCheckLogin.class);
+       if (checkLogin!=null){
+           SaManager.getStpLogic().checkByAnnotation(checkLogin);
+       }
+
+
+   });
+    //endregion
 
     /**
      * 判断集合是否包含指定元素

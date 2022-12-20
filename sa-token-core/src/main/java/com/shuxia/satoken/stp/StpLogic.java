@@ -3,6 +3,7 @@ package com.shuxia.satoken.stp;
 
 import cn.hutool.core.util.StrUtil;
 import com.shuxia.satoken.SaManager;
+import com.shuxia.satoken.annotation.SaCheckLogin;
 import com.shuxia.satoken.config.SaCookieConfig;
 import com.shuxia.satoken.config.SaTokenConfig;
 import com.shuxia.satoken.context.SaTokenContext;
@@ -63,6 +64,17 @@ public class StpLogic {
         this.loginType = loginType;
         return this;
     }
+
+    // region -------------------- 注解鉴权 ----------------------
+
+    /**
+     * 根据注解  --@SaCheckLogin 鉴权
+     * @param saCheckLogin
+     */
+    public  void checkByAnnotation(SaCheckLogin saCheckLogin){
+        this.checkLogin();
+    }
+    //endregion
     // region -------------------- 角色认证 ----------------------
 
     /**
