@@ -1,8 +1,10 @@
 import com.shuxia.satoken.SaManager;
+import com.shuxia.satoken.annotation.SaCheckLogin;
 import com.shuxia.satoken.context.SaTokenContext;
 import com.shuxia.satoken.dao.SatoKenDao;
 import com.shuxia.satoken.spring.App;
 import com.shuxia.satoken.spring.SaTokenContextForSpring;
+import com.shuxia.satoken.spring.demo.CheckAnnotation;
 import com.shuxia.satoken.stp.StpInterface;
 import com.shuxia.satoken.stp.StpLogic;
 import com.shuxia.satoken.stp.StpUtil;
@@ -61,5 +63,13 @@ public class StpUtilTest {
         System.out.println("是否有a，d任意权限：  "+StpUtil.hasPermissionOr("a", "d"));
         System.out.println("是否有c，d任意权限：  "+StpUtil.hasPermissionOr("c", "d"));
 
+    }
+
+    @Autowired
+    CheckAnnotation checkAnnotation;
+    @Test
+    public void testCheck(){
+        StpUtil.login(100);
+        checkAnnotation.checkPermission3();
     }
 }

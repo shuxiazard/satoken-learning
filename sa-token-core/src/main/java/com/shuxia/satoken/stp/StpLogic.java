@@ -1,9 +1,12 @@
 package com.shuxia.satoken.stp;
 
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import com.shuxia.satoken.SaManager;
 import com.shuxia.satoken.annotation.SaCheckLogin;
+import com.shuxia.satoken.annotation.SaCheckPermission;
+import com.shuxia.satoken.annotation.SaMode;
 import com.shuxia.satoken.config.SaCookieConfig;
 import com.shuxia.satoken.config.SaTokenConfig;
 import com.shuxia.satoken.context.SaTokenContext;
@@ -66,6 +69,31 @@ public class StpLogic {
     }
 
     // region -------------------- 注解鉴权 ----------------------
+
+    /**
+     * 根据注解 @SaCheckPermission 鉴权
+     * @param saCheckPermission
+     */
+    public void checkByAnnotation(SaCheckPermission saCheckPermission){
+        String[] permissionList = saCheckPermission.value();
+        try {
+            if (saCheckPermission.mode() == SaMode.AND){
+                this.checkPermissionAnd(permissionList);
+            }else{
+                this.checkPermissionOr(permissionList);
+            }
+        }catch (NotPermissionException e){
+            if (saCheckPermission.orRole().length>0){
+                for (String role : saCheckPermission.orRole()) {
+                    String[] strings = StrUtil.splitToArray(role, ",");
+                    if (hasRoleOr(strings)){
+                        return;
+                    }
+                }
+            }
+            throw e;
+        }
+    }
 
     /**
      * 根据注解  --@SaCheckLogin 鉴权

@@ -24,7 +24,8 @@ public class SaCheckAspect {
      * 定义AOP签名 (切入所有使用sa-token鉴权注解的方法)
      */
     public static final String POINTCUT_SIGN =
-            "@within(com.shuxia.satoken.annotation.SaCheckLogin) || @annotation(com.shuxia.satoken.annotation.SaCheckLogin)";
+            "@within(com.shuxia.satoken.annotation.SaCheckLogin) || @annotation(com.shuxia.satoken.annotation.SaCheckLogin) ||" +
+                    "@within(com.shuxia.satoken.annotation.SaCheckPermission) || @annotation(com.shuxia.satoken.annotation.SaCheckPermission)";
 
 
     @Pointcut(POINTCUT_SIGN)
