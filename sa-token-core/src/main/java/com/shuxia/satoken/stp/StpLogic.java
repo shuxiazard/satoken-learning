@@ -6,6 +6,7 @@ import cn.hutool.core.util.StrUtil;
 import com.shuxia.satoken.SaManager;
 import com.shuxia.satoken.annotation.SaCheckLogin;
 import com.shuxia.satoken.annotation.SaCheckPermission;
+import com.shuxia.satoken.annotation.SaCheckRole;
 import com.shuxia.satoken.annotation.SaMode;
 import com.shuxia.satoken.config.SaCookieConfig;
 import com.shuxia.satoken.config.SaTokenConfig;
@@ -70,6 +71,30 @@ public class StpLogic {
 
     // region -------------------- 注解鉴权 ----------------------
 
+    /**
+     *  根据注解 @SaCheckRole 鉴权
+     * @param saCheckRole
+     */
+    public void checkByAnnotation(SaCheckRole saCheckRole){
+        String[] roles = saCheckRole.value();
+        try {
+            if (saCheckRole.mode()==SaMode.AND){
+                this.checkRoleAnd(roles);
+            }else{
+                this.checkRoleOr(roles);
+            }
+        }catch(NotRoleException e){
+            if (saCheckRole.orPermission().length>0){
+                for (String permission : saCheckRole.orPermission()) {
+                    String[] strings = StrUtil.splitToArray(permission, ",");
+                    if (hasPermissionOr(strings)){
+                        return;
+                    }
+                }
+            }
+            throw e;
+        }
+    }
     /**
      * 根据注解 @SaCheckPermission 鉴权
      * @param saCheckPermission

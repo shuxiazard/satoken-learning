@@ -70,6 +70,6 @@ public class StpUtilTest {
     @Test
     public void testCheck(){
         StpUtil.login(100);
-        checkAnnotation.checkPermission3();
+        checkAnnotation.checkRole();
     }
 }

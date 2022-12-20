@@ -1,6 +1,7 @@
 package com.shuxia.satoken.spring.demo;
 
 import com.shuxia.satoken.annotation.SaCheckPermission;
+import com.shuxia.satoken.annotation.SaCheckRole;
 import com.shuxia.satoken.annotation.SaMode;
 import org.springframework.stereotype.Component;
 
@@ -22,5 +23,10 @@ public class CheckAnnotation {
     @SaCheckPermission(value = {"a,b"},mode = SaMode.OR,orRole = {"a,a"})
     public void checkPermission3(){
         System.out.println("check ok");
+    }
+
+    @SaCheckRole(value = {"user"})
+    public void checkRole(){
+        System.out.println("check ok-----------------------------------");
     }
 }

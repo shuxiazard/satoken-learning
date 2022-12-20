@@ -1,5 +1,6 @@
 package com.shuxia.satoken.stp;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -16,6 +17,7 @@ public class StpInterfaceDefaultImpl implements StpInterface {
 
     @Override
     public List<String> getRoleList(Object loginId, String loginType) {
-        return Collections.emptyList();
+        return Arrays.asList("user","root");
+        //return Collections.emptyList();
     }
 }

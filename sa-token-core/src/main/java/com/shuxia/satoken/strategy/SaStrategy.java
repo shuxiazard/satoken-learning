@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.shuxia.satoken.SaManager;
 import com.shuxia.satoken.annotation.SaCheckLogin;
 import com.shuxia.satoken.annotation.SaCheckPermission;
+import com.shuxia.satoken.annotation.SaCheckRole;
 import com.shuxia.satoken.session.SaSession;
 import com.shuxia.satoken.stp.StpLogic;
 import com.shuxia.satoken.util.SaFoxUtil;
@@ -71,6 +72,11 @@ public class SaStrategy {
         SaCheckPermission saCheckPermission = (SaCheckPermission) SaStrategy.me.getAnnotation.apply(element, SaCheckPermission.class);
        if (saCheckPermission!=null){
            SaManager.getStpLogic().checkByAnnotation(saCheckPermission);
+       }
+       // //检验@SaCheckPermission
+        SaCheckRole saCheckRole = (SaCheckRole) SaStrategy.me.getAnnotation.apply(element, SaCheckRole.class);
+       if (saCheckRole!=null){
+           SaManager.getStpLogic().checkByAnnotation(saCheckRole);
        }
 
 

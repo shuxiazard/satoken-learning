@@ -25,7 +25,8 @@ public class SaCheckAspect {
      */
     public static final String POINTCUT_SIGN =
             "@within(com.shuxia.satoken.annotation.SaCheckLogin) || @annotation(com.shuxia.satoken.annotation.SaCheckLogin) ||" +
-                    "@within(com.shuxia.satoken.annotation.SaCheckPermission) || @annotation(com.shuxia.satoken.annotation.SaCheckPermission)";
+                    "@within(com.shuxia.satoken.annotation.SaCheckPermission) || @annotation(com.shuxia.satoken.annotation.SaCheckPermission) ||"+
+                    "@within(com.shuxia.satoken.annotation.SaCheckRole) || @annotation(com.shuxia.satoken.annotation.SaCheckRole)";
 
 
     @Pointcut(POINTCUT_SIGN)
