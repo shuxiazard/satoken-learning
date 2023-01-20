@@ -1,6 +1,5 @@
 package com.shuxia.satoken.dao;
 
-import com.shuxia.satoken.session.SaSession;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -50,7 +49,7 @@ public class SaTokenDaoDefaultImpl implements SatoKenDao{
     }
 
     @Override
-    public void updateObject(String id, SaSession saSession) {
+    public void updateObject(String id, Object saSession) {
         if (getKeyTimeout(id) ==SatoKenDao.NOT_VALUE_EXPIRE){
             return;
         }
@@ -88,6 +87,18 @@ public class SaTokenDaoDefaultImpl implements SatoKenDao{
     @Override
     public long getTimeout(String key) {
         return getKeyTimeout(key);
+    }
+
+    @Override
+    public void updateTimeout(String key, long timeout) {
+        expireMap.put(key, (timeout == SatoKenDao.NEVER_EXPIRE) ? (SatoKenDao.NEVER_EXPIRE) : (System.currentTimeMillis() + timeout * 1000));
+    }
+
+
+    @Override
+    public void updateObjectTimeout(String key, long timeout) {
+        expireMap.put(key, (timeout == SatoKenDao.NEVER_EXPIRE) ? (SatoKenDao.NEVER_EXPIRE) : (System.currentTimeMillis() + timeout * 1000));
+
     }
 
     @Override

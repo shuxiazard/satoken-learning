@@ -1,14 +1,11 @@
 package com.shuxia.satoken.strategy;
 
 import cn.hutool.core.util.RandomUtil;
-import cn.hutool.core.util.StrUtil;
 import com.shuxia.satoken.SaManager;
 import com.shuxia.satoken.annotation.SaCheckLogin;
 import com.shuxia.satoken.annotation.SaCheckPermission;
 import com.shuxia.satoken.annotation.SaCheckRole;
 import com.shuxia.satoken.session.SaSession;
-import com.shuxia.satoken.stp.StpLogic;
-import com.shuxia.satoken.util.SaFoxUtil;
 import com.shuxia.satoken.util.SaTokenConsts;
 import org.springframework.util.CollectionUtils;
 

@@ -3,14 +3,12 @@ package com.shuxia.satoken;
 import com.shuxia.satoken.config.SaTokenConfig;
 import com.shuxia.satoken.context.SaTokenContext;
 import com.shuxia.satoken.context.SaTokenContextDefaultImpl;
-import com.shuxia.satoken.context.model.SaStorage;
 import com.shuxia.satoken.dao.SaTokenDaoDefaultImpl;
 import com.shuxia.satoken.dao.SatoKenDao;
 import com.shuxia.satoken.stp.StpInterface;
 import com.shuxia.satoken.stp.StpInterfaceDefaultImpl;
 import com.shuxia.satoken.stp.StpLogic;
 import com.shuxia.satoken.stp.StpUtil;
-import com.sun.xml.internal.fastinfoset.stax.StAXManager;
 
 /**
  * @author shuxia

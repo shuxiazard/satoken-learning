@@ -2,6 +2,8 @@ package com.shuxia.satoken.dao;
 
 import com.shuxia.satoken.session.SaSession;
 
+import java.util.List;
+
 /**
  * @author shuxia
  * @date 11/27/2022
@@ -50,7 +52,7 @@ public interface SatoKenDao {
         updateObjectSessionTimeout(sessionId,minTimeout);
     }
 
-    void updateObjectSessionTimeout(String sessionId, Long minTimeout);
+    default void updateObjectSessionTimeout(String sessionId, Long minTimeout){updateObjectTimeout(sessionId,minTimeout);}
 
     /**
      * 更新session
@@ -60,7 +62,6 @@ public interface SatoKenDao {
         updateObject(saSession.getId(),saSession);
     }
 
-    void updateObject(String id, SaSession saSession);
 
     /**
      * 写入value，设置存活时间
@@ -68,7 +69,7 @@ public interface SatoKenDao {
      * @param valueOf
      * @param timeout
      */
-    void set(String splicingKeyToken, String valueOf, Long timeout);
+    void set(String key, String valueOf, Long timeout);
     /**
      * 删除key
      * @param splicingKeyToken
@@ -95,4 +96,12 @@ public interface SatoKenDao {
     String get(String key);
 
     long getTimeout(String key);
-}
+
+    void updateTimeout(String key,long timeout);
+
+    void updateObject(String key, Object object);
+
+    void updateObjectTimeout(String key,long timeout);
+
+
+    }
