@@ -3,6 +3,7 @@ package com.shuxia.satoken.spring;
 import com.shuxia.satoken.SaManager;
 import com.shuxia.satoken.config.SaTokenConfig;
 import com.shuxia.satoken.context.SaTokenContext;
+import com.shuxia.satoken.dao.SatoKenDao;
 import com.shuxia.satoken.stp.StpInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,14 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class SaBeanInject {
+
+
+    /**
+     * 注入持久化Bean （redis 等）
+     * @param satoKenDao
+     */
+    @Autowired(required = false)
+    public void setSaToken(SatoKenDao satoKenDao){SaManager.setSaTokenDao(satoKenDao);}
 
     /**
      * 注入SaTokenConfig

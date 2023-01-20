@@ -2,6 +2,7 @@ import com.shuxia.satoken.SaManager;
 import com.shuxia.satoken.annotation.SaCheckLogin;
 import com.shuxia.satoken.context.SaTokenContext;
 import com.shuxia.satoken.dao.SatoKenDao;
+import com.shuxia.satoken.redis.SaTokenDaoRedis;
 import com.shuxia.satoken.spring.App;
 import com.shuxia.satoken.spring.SaTokenContextForSpring;
 import com.shuxia.satoken.spring.demo.CheckAnnotation;
@@ -14,6 +15,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.ArrayList;
@@ -71,5 +73,13 @@ public class StpUtilTest {
     public void testCheck(){
         StpUtil.login(100);
         checkAnnotation.checkRole();
+    }
+
+    @Autowired
+    SaTokenDaoRedis saTokenDaoRedis;
+    @Test
+    public void testRedis(){
+       StpUtil.login(100);
+
     }
 }
