@@ -82,4 +82,14 @@ public interface SaTokenConsts {
      */
     public static final int NOT_DISABLE_LEVEL = -2;
 
+    /**
+     * 常量key标记: 在进行 Token 二级验证时，默认的业务类型
+     */
+    public static final String DEFAULT_SAFE_AUTH_SERVICE = "important";
+
+    /**
+     * 常量key标记: 在进行 Token 二级验证时，写入的 value 值
+     */
+    public static final String SAFE_AUTH_SAVE_VALUE = "SAFE_AUTH_SAVE_VALUE";
+
 }

@@ -5,6 +5,7 @@ import com.shuxia.satoken.SaManager;
 import com.shuxia.satoken.annotation.SaCheckLogin;
 import com.shuxia.satoken.annotation.SaCheckPermission;
 import com.shuxia.satoken.annotation.SaCheckRole;
+import com.shuxia.satoken.annotation.SaCheckSafe;
 import com.shuxia.satoken.session.SaSession;
 import com.shuxia.satoken.util.SaTokenConsts;
 import org.springframework.util.CollectionUtils;
@@ -70,13 +71,16 @@ public class SaStrategy {
        if (saCheckPermission!=null){
            SaManager.getStpLogic().checkByAnnotation(saCheckPermission);
        }
-       // //检验@SaCheckPermission
+       //检验@SaCheckPermission
         SaCheckRole saCheckRole = (SaCheckRole) SaStrategy.me.getAnnotation.apply(element, SaCheckRole.class);
        if (saCheckRole!=null){
            SaManager.getStpLogic().checkByAnnotation(saCheckRole);
        }
-
-
+       //检验@SaCheckSafe
+        SaCheckSafe saCheckSafe = (SaCheckSafe) SaStrategy.me.getAnnotation.apply(element, SaCheckSafe.class);
+        if (saCheckSafe !=null){
+            SaManager.getStpLogic().checkByAnnotation(saCheckSafe);
+        }
     });
     //endregion
 

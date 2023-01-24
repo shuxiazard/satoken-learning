@@ -1,16 +1,10 @@
 package com.shuxia.satoken.stp;
 
 
-import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.StrUtil;
 import com.shuxia.satoken.SaManager;
-import com.shuxia.satoken.annotation.SaCheckLogin;
-import com.shuxia.satoken.annotation.SaCheckPermission;
-import com.shuxia.satoken.annotation.SaCheckRole;
-import com.shuxia.satoken.annotation.SaMode;
-import com.shuxia.satoken.config.SaCookieConfig;
+import com.shuxia.satoken.annotation.*;
 import com.shuxia.satoken.config.SaTokenConfig;
-import com.shuxia.satoken.context.SaTokenContext;
 import com.shuxia.satoken.context.model.SaHolder;
 import com.shuxia.satoken.context.model.SaRequest;
 import com.shuxia.satoken.context.model.SaStorage;
@@ -23,9 +17,11 @@ import com.shuxia.satoken.strategy.SaStrategy;
 import com.shuxia.satoken.util.SaFoxUtil;
 import com.shuxia.satoken.util.SaTokenConsts;
 
+import java.sql.Struct;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -68,6 +64,79 @@ public class StpLogic {
         this.loginType = loginType;
         return this;
     }
+
+    //region --------------------二级认证 ---------------------------
+
+    /**
+     * 开启二级认证
+     * @param safeTime
+     */
+    public void openSafe(long safeTime){openSafe(SaTokenConsts.DEFAULT_SAFE_AUTH_SERVICE,safeTime);}
+
+    /**
+     * 开启二级认证
+     * @param service 业务标识
+     * @param safeTime 维持时间
+     */
+    public void openSafe(String service,long safeTime){
+        checkLogin();
+        getSaTokenDao().set(splicingKeySafe(getTokenValueNotNull(),service),SaTokenConsts.SAFE_AUTH_SAVE_VALUE, safeTime);
+}
+    /**
+     * 鉴权  @SaCheckSafe
+     * @param saCheckSafe
+     */
+    public void checkByAnnotation(SaCheckSafe saCheckSafe) {
+        this.checkSafe(saCheckSafe.value());
+    }
+
+    public void checkSafe(){ checkSafe(SaTokenConsts.DEFAULT_SAFE_AUTH_SERVICE);}
+
+    public void checkSafe(String service) {
+        String tokenValue = getTokenValue();
+        if (!isSafe(tokenValue,service)){
+            throw new NotSafeException(loginType,tokenValue,service);
+        }
+    }
+
+
+    /**
+     *  当前会话 是否处于二级认证时间内
+     * @return
+     */
+    public boolean isSafe(){return isSafe(SaTokenConsts.DEFAULT_SAFE_AUTH_SERVICE);}
+
+    /**
+     * 当前会话 是否处于二级认证时间内
+     * @param service 热敏纸业务标识
+     * @return
+     */
+    public boolean isSafe(String service){return isSafe(getTokenValue(),service);}
+
+    /**
+     * 当前会话 是否处于二级认证时间内
+     * @param token
+     * @param service
+     * @return
+     */
+    public boolean isSafe(String token,String service){
+        if (StrUtil.isEmpty(token)){return false;}
+        // 拼接key
+        String value = getSaTokenDao().get(splicingKeySafe(token, service));
+        return StrUtil.isNotEmpty(value);
+    }
+
+    /**
+     * 拼接key ：二级认证
+     * @param token 认证token
+     * @param service 认证业务标识
+     * @return
+     */
+    public String splicingKeySafe(String token ,String service){
+        return getConfig().getTokenName() + ":" + loginType + ":safe:" + service + ":" + token;
+    }
+
+    //endregion
 
     // region -------------------- 注解鉴权 ----------------------
 
@@ -1294,5 +1363,17 @@ public class StpLogic {
             token = request.getCookieValue(tokenName);
         }
         return token;
+    }
+
+    /**
+     * 获取当前token 获取不到抛异常
+     * @return
+     */
+    public String getTokenValueNotNull(){
+        String tokenValue = getTokenValue();
+        if (StrUtil.isEmpty(tokenValue)){
+            throw new SaTokenException("未读取有效token");
+        }
+        return tokenValue;
     }
 }

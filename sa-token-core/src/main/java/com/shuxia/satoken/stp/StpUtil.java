@@ -234,4 +234,34 @@ public class StpUtil {
         return stpLogic.hasRoleOr(role);
     }
     //endregion
+
+
+    // region ---------------------二级认证---------------------
+
+    /**
+     * 开启二级认证
+     */
+    public static void openSafe(long safeTime){ stpLogic.openSafe(safeTime);}
+    /**
+     * 开启二级认证
+     * @param service 业务标识
+     * @param safeTime 维持时间
+     */
+    public static void openSafe(String service,long safeTime){
+        stpLogic.openSafe(service,safeTime);
+    }
+
+    /**
+     * 二级认证校验
+     * @param service
+     */
+    public static void checkSafe(String service) {
+        stpLogic.checkSafe(service);
+    }
+
+    public static void checkSafe(){stpLogic.checkSafe();}
+
+    public static boolean isSafe(){return stpLogic.isSafe();}
+    public static boolean isSafe(String service){return stpLogic.isSafe(service);}
+    //endregion
 }
