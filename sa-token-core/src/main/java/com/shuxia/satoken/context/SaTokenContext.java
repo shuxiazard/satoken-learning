@@ -1,6 +1,7 @@
 package com.shuxia.satoken.context;
 
 import com.shuxia.satoken.context.model.SaRequest;
+import com.shuxia.satoken.context.model.SaResponse;
 import com.shuxia.satoken.context.model.SaStorage;
 
 /**
@@ -21,4 +22,6 @@ public interface SaTokenContext {
    }
 
     SaRequest getRequest();
+
+    SaResponse getRespone();
 }

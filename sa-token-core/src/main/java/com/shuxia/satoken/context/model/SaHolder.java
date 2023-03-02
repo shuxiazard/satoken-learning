@@ -1,5 +1,6 @@
 package com.shuxia.satoken.context.model;
 
+import cn.hutool.extra.servlet.JakartaServletUtil;
 import com.shuxia.satoken.SaManager;
 import com.shuxia.satoken.session.SaSession;
 
@@ -25,5 +26,9 @@ public class SaHolder {
      */
     public static SaRequest getRequest(){
         return SaManager.getSaTokenContextOrSecond().getRequest();
+    }
+
+    public static SaResponse getResponse() {
+        return SaManager.getSaTokenContextOrSecond().getRespone();
     }
 }

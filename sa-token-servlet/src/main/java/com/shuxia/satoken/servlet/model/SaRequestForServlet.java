@@ -3,6 +3,7 @@ package com.shuxia.satoken.servlet.model;
 import com.shuxia.satoken.context.model.SaRequest;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author shuxia

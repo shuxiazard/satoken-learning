@@ -9,6 +9,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.swing.*;
 
 /**
@@ -41,5 +42,13 @@ public class SpringMVCUtil {
      */
     public static boolean isWeb() {
         return RequestContextHolder.getRequestAttributes() !=null;
+    }
+
+    public static HttpServletResponse getResponse() {
+        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (requestAttributes==null){
+            throw new SaTokenException("非web 无法获取Response");
+        }
+        return requestAttributes.getResponse();
     }
 }

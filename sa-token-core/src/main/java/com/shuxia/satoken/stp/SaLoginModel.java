@@ -2,6 +2,7 @@ package com.shuxia.satoken.stp;
 
 import com.shuxia.satoken.SaManager;
 import com.shuxia.satoken.config.SaTokenConfig;
+import com.shuxia.satoken.dao.SatoKenDao;
 import com.shuxia.satoken.util.SaTokenConsts;
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -80,4 +81,17 @@ public class SaLoginModel {
         return this;
     }
 
+    /**
+     * cookie时长
+     * @return
+     */
+    public int getCookieTimeout() {
+        if (!getIsLastingCookie()){
+            return -1;
+        }
+        if (getTimeoutOrGlobalConfig() == SatoKenDao.NEVER_EXPIRE){
+            return Integer.MAX_VALUE;
+        }
+        return Math.toIntExact(timeout);
+    }
 }

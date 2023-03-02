@@ -4,7 +4,9 @@ package com.shuxia.satoken.stp;
 import cn.hutool.core.util.StrUtil;
 import com.shuxia.satoken.SaManager;
 import com.shuxia.satoken.annotation.*;
+import com.shuxia.satoken.config.SaCookieConfig;
 import com.shuxia.satoken.config.SaTokenConfig;
+import com.shuxia.satoken.context.model.SaCookie;
 import com.shuxia.satoken.context.model.SaHolder;
 import com.shuxia.satoken.context.model.SaRequest;
 import com.shuxia.satoken.context.model.SaStorage;
@@ -69,58 +71,75 @@ public class StpLogic {
 
     /**
      * 开启二级认证
+     *
      * @param safeTime
      */
-    public void openSafe(long safeTime){openSafe(SaTokenConsts.DEFAULT_SAFE_AUTH_SERVICE,safeTime);}
+    public void openSafe(long safeTime) {
+        openSafe(SaTokenConsts.DEFAULT_SAFE_AUTH_SERVICE, safeTime);
+    }
 
     /**
      * 开启二级认证
-     * @param service 业务标识
+     *
+     * @param service  业务标识
      * @param safeTime 维持时间
      */
-    public void openSafe(String service,long safeTime){
+    public void openSafe(String service, long safeTime) {
         checkLogin();
-        getSaTokenDao().set(splicingKeySafe(getTokenValueNotNull(),service),SaTokenConsts.SAFE_AUTH_SAVE_VALUE, safeTime);
-}
+        getSaTokenDao().set(splicingKeySafe(getTokenValueNotNull(), service), SaTokenConsts.SAFE_AUTH_SAVE_VALUE, safeTime);
+    }
+
     /**
      * 鉴权  @SaCheckSafe
+     *
      * @param saCheckSafe
      */
     public void checkByAnnotation(SaCheckSafe saCheckSafe) {
         this.checkSafe(saCheckSafe.value());
     }
 
-    public void checkSafe(){ checkSafe(SaTokenConsts.DEFAULT_SAFE_AUTH_SERVICE);}
+    public void checkSafe() {
+        checkSafe(SaTokenConsts.DEFAULT_SAFE_AUTH_SERVICE);
+    }
 
     public void checkSafe(String service) {
         String tokenValue = getTokenValue();
-        if (!isSafe(tokenValue,service)){
-            throw new NotSafeException(loginType,tokenValue,service);
+        if (!isSafe(tokenValue, service)) {
+            throw new NotSafeException(loginType, tokenValue, service);
         }
     }
 
 
     /**
-     *  当前会话 是否处于二级认证时间内
+     * 当前会话 是否处于二级认证时间内
+     *
      * @return
      */
-    public boolean isSafe(){return isSafe(SaTokenConsts.DEFAULT_SAFE_AUTH_SERVICE);}
+    public boolean isSafe() {
+        return isSafe(SaTokenConsts.DEFAULT_SAFE_AUTH_SERVICE);
+    }
 
     /**
      * 当前会话 是否处于二级认证时间内
+     *
      * @param service 热敏纸业务标识
      * @return
      */
-    public boolean isSafe(String service){return isSafe(getTokenValue(),service);}
+    public boolean isSafe(String service) {
+        return isSafe(getTokenValue(), service);
+    }
 
     /**
      * 当前会话 是否处于二级认证时间内
+     *
      * @param token
      * @param service
      * @return
      */
-    public boolean isSafe(String token,String service){
-        if (StrUtil.isEmpty(token)){return false;}
+    public boolean isSafe(String token, String service) {
+        if (StrUtil.isEmpty(token)) {
+            return false;
+        }
         // 拼接key
         String value = getSaTokenDao().get(splicingKeySafe(token, service));
         return StrUtil.isNotEmpty(value);
@@ -128,11 +147,12 @@ public class StpLogic {
 
     /**
      * 拼接key ：二级认证
-     * @param token 认证token
+     *
+     * @param token   认证token
      * @param service 认证业务标识
      * @return
      */
-    public String splicingKeySafe(String token ,String service){
+    public String splicingKeySafe(String token, String service) {
         return getConfig().getTokenName() + ":" + loginType + ":safe:" + service + ":" + token;
     }
 
@@ -141,22 +161,23 @@ public class StpLogic {
     // region -------------------- 注解鉴权 ----------------------
 
     /**
-     *  根据注解 @SaCheckRole 鉴权
+     * 根据注解 @SaCheckRole 鉴权
+     *
      * @param saCheckRole
      */
-    public void checkByAnnotation(SaCheckRole saCheckRole){
+    public void checkByAnnotation(SaCheckRole saCheckRole) {
         String[] roles = saCheckRole.value();
         try {
-            if (saCheckRole.mode()==SaMode.AND){
+            if (saCheckRole.mode() == SaMode.AND) {
                 this.checkRoleAnd(roles);
-            }else{
+            } else {
                 this.checkRoleOr(roles);
             }
-        }catch(NotRoleException e){
-            if (saCheckRole.orPermission().length>0){
+        } catch (NotRoleException e) {
+            if (saCheckRole.orPermission().length > 0) {
                 for (String permission : saCheckRole.orPermission()) {
                     String[] strings = StrUtil.splitToArray(permission, ",");
-                    if (hasPermissionOr(strings)){
+                    if (hasPermissionOr(strings)) {
                         return;
                     }
                 }
@@ -164,23 +185,25 @@ public class StpLogic {
             throw e;
         }
     }
+
     /**
      * 根据注解 @SaCheckPermission 鉴权
+     *
      * @param saCheckPermission
      */
-    public void checkByAnnotation(SaCheckPermission saCheckPermission){
+    public void checkByAnnotation(SaCheckPermission saCheckPermission) {
         String[] permissionList = saCheckPermission.value();
         try {
-            if (saCheckPermission.mode() == SaMode.AND){
+            if (saCheckPermission.mode() == SaMode.AND) {
                 this.checkPermissionAnd(permissionList);
-            }else{
+            } else {
                 this.checkPermissionOr(permissionList);
             }
-        }catch (NotPermissionException e){
-            if (saCheckPermission.orRole().length>0){
+        } catch (NotPermissionException e) {
+            if (saCheckPermission.orRole().length > 0) {
                 for (String role : saCheckPermission.orRole()) {
                     String[] strings = StrUtil.splitToArray(role, ",");
-                    if (hasRoleOr(strings)){
+                    if (hasRoleOr(strings)) {
                         return;
                     }
                 }
@@ -191,9 +214,10 @@ public class StpLogic {
 
     /**
      * 根据注解  --@SaCheckLogin 鉴权
+     *
      * @param saCheckLogin
      */
-    public  void checkByAnnotation(SaCheckLogin saCheckLogin){
+    public void checkByAnnotation(SaCheckLogin saCheckLogin) {
         this.checkLogin();
     }
     //endregion
@@ -201,106 +225,117 @@ public class StpLogic {
 
     /**
      * 获取当前账号角色集合
+     *
      * @return
      */
-  public List<String > getRoleList(){
-        try{
+    public List<String> getRoleList() {
+        try {
             return getRoleList(getLoginId());
-        }catch (NotLoginException e){
+        } catch (NotLoginException e) {
             return Collections.emptyList();
         }
-  }
+    }
 
     /**
      * 获取指定账号角色集合
+     *
      * @param loginId
      * @return
      */
-  public List<String> getRoleList(Object loginId){
-        return SaManager.getStpInterface().getRoleList(loginId,loginType);
-  }
+    public List<String> getRoleList(Object loginId) {
+        return SaManager.getStpInterface().getRoleList(loginId, loginType);
+    }
 
     /**
      * 当前账号是否有指定角色
+     *
      * @param role
      * @return
      */
-  public boolean hasRole(String role){
-      return hasElement(getRoleList(),role);
-  }
+    public boolean hasRole(String role) {
+        return hasElement(getRoleList(), role);
+    }
 
     /**
      * 获取指定账号是否有指定角色
+     *
      * @param loginId
      * @param role
      * @return
      */
-  public boolean hasRole(Object loginId,String role){
-      return hasElement(getRoleList(loginId),role);
-  }
+    public boolean hasRole(Object loginId, String role) {
+        return hasElement(getRoleList(loginId), role);
+    }
 
     /**
      * 是否拥有指定角色（多个）
+     *
      * @param role
      * @return
      */
-  public boolean hasRoleAnd(String...role){
-      try{
-          checkRoleAnd(role);
-          return true;
-      }catch (NotLoginException | NotRoleException e){
-          return false;
-      }
-  }
+    public boolean hasRoleAnd(String... role) {
+        try {
+            checkRoleAnd(role);
+            return true;
+        } catch (NotLoginException | NotRoleException e) {
+            return false;
+        }
+    }
 
     /**
      * 是否拥有指定角色（任意一个）
+     *
      * @param roles
      * @return
      */
-  public boolean hasRoleOr(String...roles){
-      try{
-          checkRoleOr(roles);
-          return true;
-      }catch (NotLoginException | NotRoleException e){
-          return false;
-      }
-  }
+    public boolean hasRoleOr(String... roles) {
+        try {
+            checkRoleOr(roles);
+            return true;
+        } catch (NotLoginException | NotRoleException e) {
+            return false;
+        }
+    }
 
     /**
      * 是否拥有指定角色
+     *
      * @param role
      */
-  public void checkRole(String role){
-      if (!hasRole(role)){
-          throw new NotRoleException(role,this.loginType);
-      }
-  }
+    public void checkRole(String role) {
+        if (!hasRole(role)) {
+            throw new NotRoleException(role, this.loginType);
+        }
+    }
+
     /**
      * 是否拥有指定角色（多个）
+     *
      * @param role
      */
     public void checkRoleAnd(String... role) {
         List<String> roleList = getRoleList();
         for (String r : role) {
-            if (!hasElement(roleList,r)){
-                throw new NotRoleException(r,this.loginType);
+            if (!hasElement(roleList, r)) {
+                throw new NotRoleException(r, this.loginType);
             }
         }
     }
+
     /**
      * 是否拥有指定角色（任意）
+     *
      * @param role
      */
     public void checkRoleOr(String... role) {
         List<String> roleList = getRoleList();
         for (String r : role) {
-            if (hasElement(roleList,r)){
+            if (hasElement(roleList, r)) {
                 return;
             }
         }
-        if (role.length>0){
-            throw new NotRoleException(role[0],this.loginType);
+        if (role.length > 0) {
+            throw new NotRoleException(role[0], this.loginType);
         }
     }
     //endregion
@@ -308,50 +343,55 @@ public class StpLogic {
 
     /**
      * 获取当前账号权限
+     *
      * @return
      */
-    public List<String> getPermissionList(){
+    public List<String> getPermissionList() {
         try {
             return getPermissionList(getLoginId());
         } catch (NotLoginException e) {
-           return Collections.emptyList();
+            return Collections.emptyList();
         }
     }
 
     /**
      * 获取权限 根据id
+     *
      * @param loginId
      * @return
      */
-    public List<String> getPermissionList(Object loginId){
-        return SaManager.getStpInterface().getPermissionList(loginId,loginType);
+    public List<String> getPermissionList(Object loginId) {
+        return SaManager.getStpInterface().getPermissionList(loginId, loginType);
     }
 
     /**
      * 是否有指定权限
+     *
      * @param permission
      * @return
      */
-    public boolean hasPermission(String permission){
-        return hasElement(getPermissionList(),permission);
+    public boolean hasPermission(String permission) {
+        return hasElement(getPermissionList(), permission);
     }
 
     /**
      * 根据id和指定权限判断是否有权限
+     *
      * @param loginId
      * @param permission
      * @return
      */
-    public boolean hasPermission(Object loginId ,String permission){
-        return hasElement(getPermissionList(loginId),permission);
+    public boolean hasPermission(Object loginId, String permission) {
+        return hasElement(getPermissionList(loginId), permission);
     }
 
     /**
      * 是否有多个指定权限
+     *
      * @param permissionArray
      * @return
      */
-    public boolean hasPermissionAnd(String...permissionArray){
+    public boolean hasPermissionAnd(String... permissionArray) {
         try {
             checkPermissionAnd(permissionArray);
             return true;
@@ -362,10 +402,11 @@ public class StpLogic {
 
     /**
      * 是否有任意一个指定权限
+     *
      * @param permissionArray
      * @return
      */
-    public boolean hasPermissionOr(String...permissionArray){
+    public boolean hasPermissionOr(String... permissionArray) {
         try {
             checkPermissionOr(permissionArray);
             return true;
@@ -376,34 +417,37 @@ public class StpLogic {
 
     /**
      * 是否有指定权限
+     *
      * @param permission
      */
-    public void checkPermission(String permission){
+    public void checkPermission(String permission) {
         if (!hasPermission(permission)) {
-            throw new NotPermissionException(permission,this.loginType);
+            throw new NotPermissionException(permission, this.loginType);
         }
     }
 
     /**
      * 是否有任意一个指定权限
+     *
      * @param permissionArray
      */
     public void checkPermissionOr(String... permissionArray) {
         Object loginId = getLoginId();
         List<String> permissionList = getPermissionList(loginId);
         for (String per : permissionArray) {
-            if (hasElement(permissionList,per)) {
+            if (hasElement(permissionList, per)) {
                 return;
             }
         }
-        if (permissionArray.length>0){
-            throw new NotPermissionException(permissionArray[0],this.loginType);
+        if (permissionArray.length > 0) {
+            throw new NotPermissionException(permissionArray[0], this.loginType);
         }
     }
 
 
     /**
      * 是否有多个指定权限
+     *
      * @param permissionArray
      */
     public void checkPermissionAnd(String... permissionArray) {
@@ -411,29 +455,30 @@ public class StpLogic {
         Object loginId = getLoginId();
         List<String> permissionList = getPermissionList(loginId);
         for (String per : permissionArray) {
-            if (!hasElement(permissionList,per)){
-                throw new NotPermissionException(per,this.loginType);
+            if (!hasElement(permissionList, per)) {
+                throw new NotPermissionException(per, this.loginType);
             }
         }
     }
 
     /**
      * 集合查找元素
+     *
      * @param permissionList
      * @param permission
      * @return
      */
-    public boolean hasElement(List<String> permissionList,String permission){
-       return SaStrategy.me.hasElement.apply(permissionList,permission);
+    public boolean hasElement(List<String> permissionList, String permission) {
+        return SaStrategy.me.hasElement.apply(permissionList, permission);
     }
 
     // endregion
     // region -------------------- 会话注销 ----------------------
 
-    public void logout(){
+    public void logout() {
         // 如果连 Token 都没有，那么无需执行任何操作
         String tokenValue = getTokenValue();
-        if(SaFoxUtil.isEmpty(tokenValue)) {
+        if (SaFoxUtil.isEmpty(tokenValue)) {
             return;
         }
 
@@ -450,21 +495,23 @@ public class StpLogic {
 
     /**
      * 会话注销 根据id
+     *
      * @param loginId
      */
-    public void logout(Object loginId){
-        logout(loginId,null);
+    public void logout(Object loginId) {
+        logout(loginId, null);
     }
 
     /**
      * 会话注销 根据id和设备
+     *
      * @param loginId
      * @param service
      */
-    public void logout(Object loginId,String service){
-            //获取session
+    public void logout(Object loginId, String service) {
+        //获取session
         SaSession session = getSessionByLoginId(loginId, false);
-        if (session!=null){
+        if (session != null) {
             for (TokenSign tokenSign : session.tokenSignListCopyByDevice(service)) {
                 String token = tokenSign.getValue();
                 clearLastActivity(token);
@@ -480,16 +527,17 @@ public class StpLogic {
 
     /**
      * 会话注销 根据token
+     *
      * @param tokenValue
      */
-    public void logoutByToken(String tokenValue){
+    public void logoutByToken(String tokenValue) {
         clearLastActivity(tokenValue);
         deleteTokenToSession(tokenValue);
 
         //获取登录id
         String loginId = getLoginIdNoHandle(tokenValue);
         //验证id有效性
-        if (!isValidLoginId(loginId)){
+        if (!isValidLoginId(loginId)) {
             return;
         }
         //删除token-id映射
@@ -497,7 +545,7 @@ public class StpLogic {
 
         //删除session
         SaSession session = getSessionByLoginId(loginId, false);
-        if (session!=null){
+        if (session != null) {
             session.removeTokenSign(tokenValue);
             session.logoutByTokenSignCountToZero();
         }
@@ -522,44 +570,47 @@ public class StpLogic {
      * @param loginId 账号id
      * @param service 封禁服务
      * @param time    封禁天数 （单位秒）
-     *
      */
-    public void disable(Object loginId, String service,long time) {
+    public void disable(Object loginId, String service, long time) {
         disableLevel(loginId, service, SaTokenConsts.DEFAULT_DISABLE_LEVEL, time);
     }
 
     /**
      * 账号是否封禁
+     *
      * @param loginId 账号id
      * @return /
      */
-    public boolean isDisable(Object loginId){
-       return isDisableLevel(loginId,SaTokenConsts.DEFAULT_DISABLE_SERVICE,SaTokenConsts.DEFAULT_DISABLE_LEVEL);
+    public boolean isDisable(Object loginId) {
+        return isDisableLevel(loginId, SaTokenConsts.DEFAULT_DISABLE_SERVICE, SaTokenConsts.DEFAULT_DISABLE_LEVEL);
     }
 
     /**
      * 账号是否封禁
+     *
      * @param loginId
      * @param service
      * @return
      */
-    public boolean isDisable(Object loginId,String service){
-        return isDisableLevel(loginId,service,SaTokenConsts.DEFAULT_DISABLE_LEVEL);
+    public boolean isDisable(Object loginId, String service) {
+        return isDisableLevel(loginId, service, SaTokenConsts.DEFAULT_DISABLE_LEVEL);
     }
 
     /**
      * 账号是否封禁 抛出异常
+     *
      * @param loginId
      * @return /
      */
-    public void checkDisable(Object loginId){
-        checkDisableLevel(loginId,SaTokenConsts.DEFAULT_DISABLE_SERVICE,SaTokenConsts.DEFAULT_DISABLE_LEVEL);
+    public void checkDisable(Object loginId) {
+        checkDisableLevel(loginId, SaTokenConsts.DEFAULT_DISABLE_SERVICE, SaTokenConsts.DEFAULT_DISABLE_LEVEL);
     }
+
     /**
      * 判断：指定账号是否已被封禁到指定等级
      *
      * @param loginId 指定账号id
-     * @param level 指定封禁等级
+     * @param level   指定封禁等级
      * @return /
      */
     public boolean isDisableLevel(Object loginId, int level) {
@@ -568,6 +619,7 @@ public class StpLogic {
 
     /**
      * 判断：指定账号的指定服务，是否已被封禁到指定等级
+     *
      * @param loginId
      * @param service
      * @param level
@@ -575,22 +627,23 @@ public class StpLogic {
      */
     public boolean isDisableLevel(Object loginId, String service, int level) {
         //检查是否被封禁
-       int disableLevel= getDisableLevel(loginId,service);
-      if (disableLevel ==SaTokenConsts.NOT_DISABLE_LEVEL){
-          return false;
-      }
-      return disableLevel >=level;
+        int disableLevel = getDisableLevel(loginId, service);
+        if (disableLevel == SaTokenConsts.NOT_DISABLE_LEVEL) {
+            return false;
+        }
+        return disableLevel >= level;
     }
 
     /**
      * 获取封禁等级
+     *
      * @param loginId
      * @param service
      * @return 未被封禁则返回-2
      */
     public int getDisableLevel(Object loginId, String service) {
         String value = getSaTokenDao().get(splicingKeyDisable(loginId, service));
-        if (SaFoxUtil.isEmpty(value)){
+        if (SaFoxUtil.isEmpty(value)) {
             return SaTokenConsts.NOT_DISABLE_LEVEL;
         }
         return Integer.parseInt(value);
@@ -602,8 +655,8 @@ public class StpLogic {
      * @param loginId 账号id
      * @return
      */
-    public void checkDisableLevel(Object loginId,int level) {
-      checkDisableLevel(loginId, SaTokenConsts.DEFAULT_DISABLE_SERVICE, level);
+    public void checkDisableLevel(Object loginId, int level) {
+        checkDisableLevel(loginId, SaTokenConsts.DEFAULT_DISABLE_SERVICE, level);
     }
 
     /**
@@ -641,9 +694,10 @@ public class StpLogic {
 
     /**
      * 封禁：指定账号，并指定封禁等级
+     *
      * @param loginId 指定账号id
-     * @param level 指定封禁等级
-     * @param time 封禁时间, 单位: 秒 （-1=永久封禁）
+     * @param level   指定封禁等级
+     * @param time    封禁时间, 单位: 秒 （-1=永久封禁）
      */
     public void disableLevel(Object loginId, int level, long time) {
         disableLevel(loginId, SaTokenConsts.DEFAULT_DISABLE_SERVICE, level, time);
@@ -673,27 +727,29 @@ public class StpLogic {
 
     /**
      * 解封账号
+     *
      * @param loginId
      */
-    public void uniteDisable(Object loginId){
-        uniteDisable(loginId,SaTokenConsts.DEFAULT_DISABLE_SERVICE);
+    public void uniteDisable(Object loginId) {
+        uniteDisable(loginId, SaTokenConsts.DEFAULT_DISABLE_SERVICE);
     }
 
     /**
      * 解封账号
+     *
      * @param loginId
      * @param services
      */
-    public void uniteDisable(Object loginId,String...services){
+    public void uniteDisable(Object loginId, String... services) {
         // 空值检查
-        if(SaFoxUtil.isEmpty(loginId)) {
+        if (SaFoxUtil.isEmpty(loginId)) {
             throw new SaTokenException("请提供要解禁的账号");
         }
-        if(services == null || services.length == 0) {
+        if (services == null || services.length == 0) {
             throw new SaTokenException("请提供要解禁的服务");
         }
         for (String service : services) {
-            getSaTokenDao().delete(splicingKeyDisable(loginId,service));
+            getSaTokenDao().delete(splicingKeyDisable(loginId, service));
             SaTokenEventCenter.doUntieDisable(loginType, loginId, service);
         }
 
@@ -788,6 +844,16 @@ public class StpLogic {
     }
 
     /**
+     * 记住我
+     *
+     * @param id
+     * @param isLastingCookie
+     */
+    public void login(Object id, boolean isLastingCookie) {
+        login(id, new SaLoginModel().setIsLastingCookie(isLastingCookie));
+    }
+
+    /**
      * 会话登录，并指定所有登录参数Model
      *
      * @param id         登录id，建议的类型：（long | int | String）
@@ -814,6 +880,43 @@ public class StpLogic {
         //保存token
         setTokenValueToStorage(token);
 
+        //保存到cookie
+        if (getConfig().getIsReadCookie()) {
+            setTokenValueToCookie(token, loginModel.getCookieTimeout());
+        }
+
+    }
+
+    /**
+     * 保存到cookie
+     *
+     * @param token
+     * @param cookieTimeout
+     */
+    public void setTokenValueToCookie(String token, int cookieTimeout) {
+        SaCookieConfig cfg = getConfig().getCookie();
+        SaCookie cookie = new SaCookie();
+        cookie.setName(getTokenName());
+        cookie.setValue(token);
+        cookie.setMaxAge(cookieTimeout);
+        cookie.setDomain(cfg.getDomain());
+        cookie.setPath(cfg.getPath());
+        cookie.setSecure(cfg.getSecure());
+        cookie.setHttpOnly(cfg.getHttpOnly());
+        cookie.setSameSite(cfg.getSameSite());
+        SaHolder.getResponse().addCookie(cookie);
+    }
+
+    /**
+     * 返回token名称
+     * @return
+     */
+    public String getTokenName() {
+        return splicingKeyTokenName();
+    }
+
+    public String splicingKeyTokenName() {
+        return getConfig().getTokenName();
     }
 
     /**
@@ -1367,11 +1470,12 @@ public class StpLogic {
 
     /**
      * 获取当前token 获取不到抛异常
+     *
      * @return
      */
-    public String getTokenValueNotNull(){
+    public String getTokenValueNotNull() {
         String tokenValue = getTokenValue();
-        if (StrUtil.isEmpty(tokenValue)){
+        if (StrUtil.isEmpty(tokenValue)) {
             throw new SaTokenException("未读取有效token");
         }
         return tokenValue;
